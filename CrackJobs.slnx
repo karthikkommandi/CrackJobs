@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="../CrackJobUI/crackjobui.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="CrackJobs.csproj" />
+</Solution>

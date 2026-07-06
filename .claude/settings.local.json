@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(dotnet build c:\\\\Home\\\\Karthik\\\\Apps\\\\CrackJobs\\\\CrackJobs.csproj -nologo -v q 2>&1)"
+    ]
+  }
+}
