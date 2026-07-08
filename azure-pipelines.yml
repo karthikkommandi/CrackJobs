@@ -43,7 +43,7 @@ steps:
 
 # Build
 - script: |
-    dotnet build --configuration $(buildConfiguration) --no-restore
+    dotnet build CrackJobs.csproj --configuration Release --no-restore
   displayName: 'Build Project'
 
 # Run Tests (if any)
@@ -54,7 +54,7 @@ steps:
 
 # Publish
 - script: |
-    dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)
+    dotnet publish CrackJobs.csproj --configuration Release --no-build --output $(Build.ArtifactStagingDirectory)
   displayName: 'Publish API'
 
 # Publish Artifact
