@@ -23,6 +23,19 @@ steps:
     packageType: 'sdk'
     version: '10.x'
 
+#Diagnose
+- script: |
+    echo "Current directory:"
+    pwd
+    echo "Files:"
+    ls -la
+    echo "Searching for solution and project files..."
+    find . -name "*.csproj"
+    find . -name "*.sln"
+    find . -name "*.slnx"
+    find . -name "*.esproj"
+  displayName: 'Debug Repository'
+
 # Restore packages
 - script: |
     dotnet restore
