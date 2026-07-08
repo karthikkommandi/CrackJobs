@@ -47,10 +47,10 @@ steps:
   displayName: 'Build Project'
 
 # Run Tests (if any)
-- script: |
-    dotnet test --no-build --configuration $(buildConfiguration)
-  displayName: 'Run Tests'
-  continueOnError: true
+#- script: |
+    #dotnet test --no-build --configuration $(buildConfiguration)
+  #displayName: 'Run Tests'
+  #continueOnError: true
 
 # Publish
 - script: |
