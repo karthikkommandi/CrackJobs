@@ -1,0 +1,57 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo CI Pipeline started
+  displayName: 'Run a one-line script'
+
+  # Checkout source code
+- checkout: self
+
+# Install .NET SDK
+- task: UseDotNet@2
+  displayName: 'Install .NET 10 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '10.x'
+
+# Restore packages
+- script: |
+    dotnet restore
+  displayName: 'Restore NuGet Packages'
+
+# Build
+- script: |
+    dotnet build --configuration $(buildConfiguration) --no-restore
+  displayName: 'Build Project'
+
+# Run Tests (if any)
+- script: |
+    dotnet test --no-build --configuration $(buildConfiguration)
+  displayName: 'Run Tests'
+  continueOnError: true
+
+# Publish
+- script: |
+    dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)
+  displayName: 'Publish API'
+
+# Publish Artifact
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Build Artifact'
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'API'
+
+- script: |
+    echo All Tasks completed.
+    echo See https://aka.ms/yaml
+  displayName: 'CI Pipeline completed'
