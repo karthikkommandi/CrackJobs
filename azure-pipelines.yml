@@ -65,6 +65,22 @@ steps:
     artifactName: 'API'
 
 - script: |
-    echo All Tasks completed.
+    echo All CI Tasks are  completed.
     echo See https://aka.ms/yaml
   displayName: 'CI Pipeline completed'
+
+- task: SSH@0
+  displayName: 'Test SSH Connection'
+  inputs:
+    sshEndpoint: 'AzureVM-SSH'
+    runOptions: 'inline'
+    inline: |
+      echo "=========================="
+      echo "SSH Connected Successfully"
+      echo "=========================="
+
+      whoami
+      hostname
+      pwd
+
+      ls -la /home/kkmail2027
