@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="publish\**" />
+    <Content Remove="publish\**" />
+    <EmbeddedResource Remove="publish\**" />
+    <None Remove="publish\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+	<PackageReference Include="Microsoft.AspNetCore.Diagnostics.HealthChecks" Version="2.2.0" />
 	<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
 	  <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.5" />
