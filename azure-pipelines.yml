@@ -124,4 +124,4 @@ steps:
     runOptions: 'inline'
     inline: |
       echo "Testing API..."
-      curl http://localhost/api/masterdata/questions
+      curl http://20.220.217.230:5000/health
