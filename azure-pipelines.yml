@@ -79,8 +79,49 @@ steps:
       echo "SSH Connected Successfully"
       echo "=========================="
 
-      whoami
-      hostname
-      pwd
+     # whoami
+     # hostname
+     # pwd
+     # ls -la /home/kkmail2027
 
-      ls -la /home/kkmail2027
+# Download the published artifact
+- task: DownloadBuildArtifacts@1
+  displayName: 'Download Build Artifact'
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'API'
+    downloadPath: '$(Pipeline.Workspace)'
+
+- task: CopyFilesOverSSH@0
+  displayName: 'Deploy API to Azure VM'
+  inputs:
+    sshEndpoint: 'AzureVM-SSH'
+    sourceFolder: '$(Pipeline.Workspace)/API'
+    contents: '**'
+    targetFolder: '/home/kkmail2027/code/API'
+    cleanTargetFolder: false
+    overwrite: true
+
+- task: SSH@0
+  displayName: 'Restart API Service'
+  inputs:
+    sshEndpoint: 'AzureVM-SSH'
+    runOptions: 'inline'
+    inline: |
+      echo "Restarting API..."
+      sudo systemctl restart myapi
+
+      echo "Checking service status..."
+      sudo systemctl status myapi --no-pager
+
+      echo "Deployment completed."
+
+- task: SSH@0
+  displayName: 'Verify Deployment'
+  inputs:
+    sshEndpoint: 'AzureVM-SSH'
+    runOptions: 'inline'
+    inline: |
+      echo "Testing API..."
+      curl -I curl http://localhost:80/api/masterdata/questions
