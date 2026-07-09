@@ -124,4 +124,4 @@ steps:
     runOptions: 'inline'
     inline: |
       echo "Testing API..."
-      curl -I curl http://localhost:80/api/masterdata/questions
+      curl http://localhost/api/masterdata/questions
