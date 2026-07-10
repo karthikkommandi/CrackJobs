@@ -1,0 +1,72 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+  dockerImageName: 'crackjobs-api'
+  dockerImageTag: '$(Build.BuildId)'
+
+steps:
+
+# Checkout Source
+- checkout: self
+  clean: true
+
+# Install .NET SDK
+- task: UseDotNet@2
+  displayName: 'Install .NET SDK 10'
+  inputs:
+    packageType: 'sdk'
+    version: '10.x'
+
+# Restore NuGet Packages
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Packages'
+  inputs:
+    command: 'restore'
+    projects: '**/CrackJobs.csproj'
+
+# Build Solution
+- task: DotNetCoreCLI@2
+  displayName: 'Build Solution'
+  inputs:
+    command: 'build'
+    projects: '**/CrackJobs.csproj'
+    arguments: '--configuration $(buildConfiguration) --no-restore'
+
+# Run Unit Tests
+#- task: DotNetCoreCLI@2
+ # displayName: 'Run Unit Tests'
+  #inputs:
+   # command: 'test'
+    #projects: '**/*Tests/*.csproj'
+    #arguments: '--configuration $(buildConfiguration) --no-build'
+  #continueOnError: true
+
+# Build Docker Image
+- task: Docker@2
+  displayName: 'Build Docker Image'
+  inputs:
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
+    repository: '$(dockerImageName)'
+    tags: |
+      $(dockerImageTag)
+      latest
+
+# Save Docker Image as Artifact (Optional)
+- script: |
+    docker save $(dockerImageName):latest -o $(Build.ArtifactStagingDirectory)/crackjobs-api.tar
+  displayName: 'Save Docker Image'
+
+# Publish Artifact
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Docker Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'docker-image'
