@@ -4,69 +4,75 @@ trigger:
       - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
 
 variables:
-  buildConfiguration: 'Release'
-  dockerImageName: 'crackjobs-api'
-  dockerImageTag: '$(Build.BuildId)'
+  buildConfiguration: Release
 
 steps:
 
-# Checkout Source
+# Checkout
 - checkout: self
   clean: true
 
 # Install .NET SDK
 - task: UseDotNet@2
-  displayName: 'Install .NET SDK 10'
+  displayName: Install .NET 10 SDK
   inputs:
-    packageType: 'sdk'
-    version: '10.x'
+    packageType: sdk
+    version: 10.x
 
-# Restore NuGet Packages
+# Restore
 - task: DotNetCoreCLI@2
-  displayName: 'Restore Packages'
+  displayName: Restore Packages
   inputs:
-    command: 'restore'
+    command: restore
     projects: '**/CrackJobs.csproj'
 
-# Build Solution
+# Build
 - task: DotNetCoreCLI@2
-  displayName: 'Build Solution'
+  displayName: Build Solution
   inputs:
-    command: 'build'
+    command: build
     projects: '**/CrackJobs.csproj'
     arguments: '--configuration $(buildConfiguration) --no-restore'
 
-# Run Unit Tests
-#- task: DotNetCoreCLI@2
- # displayName: 'Run Unit Tests'
-  #inputs:
-   # command: 'test'
-    #projects: '**/*Tests/*.csproj'
-    #arguments: '--configuration $(buildConfiguration) --no-build'
-  #continueOnError: true
-
-# Build Docker Image
-- task: Docker@2
-  displayName: 'Build Docker Image'
+# Deploy to Azure VM
+- task: SSH@0
+  displayName: Deploy Docker Container
   inputs:
-    command: 'build'
-    Dockerfile: '**/Dockerfile'
-    repository: '$(dockerImageName)'
-    tags: |
-      $(dockerImageTag)
-      latest
+    sshEndpoint: 'AzureVM-SSH'
+    runOptions: 'inline'
+    readyTimeout: '20000'
+    inline: |
+      set -e
 
-# Save Docker Image as Artifact (Optional)
-- script: |
-    docker save $(dockerImageName):latest -o $(Build.ArtifactStagingDirectory)/crackjobs-api.tar
-  displayName: 'Save Docker Image'
+      echo "Moving to source folder..."
+      cd /home/kkmail2027/git-source/API-code/CrackJobs
 
-# Publish Artifact
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Docker Artifact'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'docker-image'
+      echo "Pulling latest code..."
+      git pull
+
+      echo "Building Docker Image..."
+      docker build -t crackjobs-api:latest .
+
+      echo "Stopping old container..."
+      docker stop crackjobs-api || true
+
+      echo "Removing old container..."
+      docker rm crackjobs-api || true
+
+      echo "Starting new container..."
+      docker run -d \
+        --name crackjobs-api \
+        --restart unless-stopped \
+        -p 8081:8080 \
+        crackjobs-api:latest
+
+      echo "Waiting for application..."
+      sleep 15
+
+      echo "Health Check"
+      curl http://localhost:8081/health
+
+      echo "Deployment Successful"
